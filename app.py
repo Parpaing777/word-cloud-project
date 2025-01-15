@@ -32,7 +32,7 @@ def tokenize(text):
     """
     This function takes the text input and tokenizes it.
     """
-    tokens = nltk.word_tokenize(text)
+    tokens = word_tokenize(text)
     return tokens
 
 def cleanText(text, lng="en"):

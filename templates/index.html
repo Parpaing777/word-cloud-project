@@ -15,14 +15,25 @@
 <!-- Body of the page -->
 <body>
     <h1>Cloud Word Generator</h1>
+    <div class = "intro">
+        <p>This app is aimed to generate word cloud from the Job Descriptions</p>
+        <p>The goal is to use the words from the JD to tailor ur CV and Cover letter to the job you're applying</p>
+        <p>It will also show the statistics of the words used in the JD</p>
+    </div>
     <textarea id="input-text" rows="10" cols="50" placeholder="Enter the text you would like to generate a cloud word for"></textarea>
     <br>
-    <button id="Generate" onclick="generateCloud()">Generate Cloud</button>
-    <button id="Stats" onclick="showStats()">Show Stats</button>
-    <select id="lng">
-        <option value = "en">English</option>
-        <option value = "fr">French</option>
-    </select>
+    <div class="btn-grp">
+        <button id="Generate" onclick="generateCloud()">Generate Cloud</button>
+        <button id="Stats" onclick="showStats()">Show Stats</button>
+        <select id="lng">
+            <option value = "en">English</option>
+            <option value = "fr">French</option>
+        </select>
+    </div>
+    <div class="clear-contain">
+        <button id="Clear" onclick="document.getElementById('output').innerHTML = ''">Clear Output</button>
+    </div>
+    
     <div id="output"></div>
 
     <!-- Javascript code for calling the python functions -->
