@@ -22,19 +22,19 @@ nltk.download('omw-1.4', quiet=True)
 tText = "This is a test text for the word cloud project. This text will be used to test the word cloud generator. This text is a test text."
 
 
-def takeText():
-    """
-    This function simply takes the text input from the user and returns it.
-    """
-    print("Enter the text you want to generate a word cloud for: ")
-    lines = []
-    while True:
-        line = input()
-        if line == "":
-            break
-        lines.append(line)
-    text = " ".join(lines)
-    return text
+# def takeText():
+#     """
+#     This function simply takes the text input from the user and returns it.
+#     """
+#     print("Enter the text you want to generate a word cloud for: ")
+#     lines = []
+#     while True:
+#         line = input()
+#         if line == "":
+#             break
+#         lines.append(line)
+#     text = " ".join(lines)
+#     return text
 
 def tokenize(text):
     """
@@ -150,7 +150,7 @@ def main():
     Main function that runs the project.
     """
     # Take the text input
-    text = takeText()
+    text = input("Enter the text you want to generate a word cloud for: ")
     # Show the statistics
     showStats(text)
     # Generate the word cloud

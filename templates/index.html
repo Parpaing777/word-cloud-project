@@ -1,0 +1,62 @@
+<!-- This is the main index page of the project. -->
+<!-- It contains the text area where the user can input text paragraphs to generate a cloud word. -->
+<!-- Also there are 2 buttons, one for generating the cloud word and another for showing the stats -->
+<!-- Both buttons will call the respective python functions -->
+<!-- author : Peter (Thant Zin Htoo) PAING  -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- content is scaled to fit the screen -->
+    <title>Cloud Word Generator</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<!-- Body of the page -->
+<body>
+    <h1>Cloud Word Generator</h1>
+    <textarea id="input-text" rows="10" cols="50" placeholder="Enter the text you would like to generate a cloud word for"></textarea>
+    <br>
+    <button id="Generate" onclick="generateCloud()">Generate Cloud</button>
+    <button id="Stats" onclick="showStats()">Show Stats</button>
+    <select id="lng">
+        <option value = "en">English</option>
+        <option value = "fr">French</option>
+    </select>
+    <div id="output"></div>
+
+    <!-- Javascript code for calling the python functions -->
+    <script>
+        function generateCloud() {
+            const text = document.getElementById("input-text").value;
+            const lng = document.getElementById("lng").value;
+            fetch('/generate', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: `text=${encodeURIComponent(text)}&lng=${encodeURIComponent(lng)}`,
+            })
+            .then((response) => response.json())
+            .then((data) => {
+                document.getElementById("output").innerHTML = `<img src="${data.image}">`;
+            });
+        }
+        function showStats() {
+            const text = document.getElementById("input-text").value;
+            const lng = document.getElementById("lng").value;
+            fetch('/stats', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: `text=${encodeURIComponent(text)}&lng=${encodeURIComponent(lng)}`,
+            })
+            .then(response => response.json())
+            .then(data => {
+                const stats = data.stats.map((stat) => `<li>${stat.word}: ${stat.frequency}</li>`).join('');
+                document.getElementById("output").innerHTML = `
+                <p>Total number of words: ${data.num_words}</p>
+                <p>Total number of unique words: ${data.num_unique_words}</p>
+                <ul>${stats}</ul>`;
+            });
+        }
+    </script>
+</body>
+</html>
