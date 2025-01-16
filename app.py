@@ -8,6 +8,7 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 import pandas as pd
 import re
+import os
 import matplotlib as mpl
 mpl.use('Agg')
 from flask_cors import CORS
@@ -15,18 +16,27 @@ from flask_cors import CORS
 app = Flask(__name__, static_folder="static", template_folder="templates") 
 CORS(app)
 
-def check_nltk():
-    """ helper function to check nltk downloads"""
-    try:
-        nltk.data.find('tokenizers/punkt')
-        nltk.data.find('corpora/stopwords')
-        nltk.data.find('corpora/wordnet')
-        nltk.data.find('corpora/omw')
-    except LookupError:
-        nltk.download('punkt', quiet=True)
-        nltk.download('stopwords', quiet=True)
-        nltk.download('wordnet', quiet=True)
-        nltk.download('omw', quiet=True)
+nltk.data.path.append(os.path.join(os.path.dirname(__file__), 'stopwords'))
+
+
+# def check_nltk():
+#     """Helper function to check nltk downloads"""
+#     try:
+#         nltk.data.find('tokenizers/punkt')
+#         nltk.data.find('corpora/stopwords')
+#         nltk.data.find('corpora/wordnet')
+#         nltk.data.find('corpora/omw-1.4')
+#     except LookupError as e:
+#         print(f"NLTK Data not found: {str(e)}")
+#         try:
+#             nltk.download('punkt')
+#             nltk.download('stopwords')
+#             nltk.download('wordnet')
+#             nltk.download('omw-1.4')
+#             print("NLTK Data downloaded successfully")
+#         except Exception as e:
+#             print(f"Error downloading NLTK data: {str(e)}")
+#             raise
 
 def tokenize(text):
     """
@@ -98,58 +108,95 @@ def transformText(text, lng="en"):
     text = lemText(text, lng)
     return text
 
-check_nltk()
+# check_nltk()
 
 @app.route('/')
 def home():
     return render_template('index.html')
-
-@app.route('/stats', methods=['POST'])
-def stats():
-    try:
-        text = request.form['text']
-        lng = request.form['lng']
-        text = transformText(text, lng)
-        num_words = len(text)
-        num_unique_words = len(set(text))
-        word_freq = nltk.FreqDist(text)
-        most_common_words = word_freq.most_common(10)
-        stats = [{'word': word, 'frequency': freq} for word, freq in most_common_words]
-        return jsonify({'num_words': num_words, 'num_unique_words': num_unique_words, 'stats': stats})
-    
-    except Exception as e:
-        print(f"Error: {str(e)}")
-        return jsonify({'error': str(e)}), 500
 
 @app.route('/generate', methods=['POST'])
 def genWordCloud():
     try:
         text = request.form.get('text','')
         lng = request.form.get('lng')
-        if not text:
-            return jsonify({'error': 'Please provide some text.'}),400
         
-        # set figure dpi
-        mpl.rcParams['figure.dpi'] = 100
+        # Add debugging prints
+        print(f"Received text length: {len(text)}")
+        print(f"Received language: {lng}")
+        
+        if not text:
+            return jsonify({'error': 'Please provide some text.'}), 400
+        
         # Transform the text and create word chain
         text = transformText(text, lng)
+        print(f"Transformed text length: {len(text)}")
+        
         text = " ".join(text)
+        print("Text joined successfully")
+        
         # Generate the word cloud
-        wordCloud = WordCloud(width=800, height=400, background_color="white",max_words=5000,contour_width=3)
-        wordCloud.generate(text)
+        try:
+            wordCloud = WordCloud(width=800, height=400, background_color="white", max_words=5000, contour_width=3)
+            wordCloud.generate(text)
+            print("WordCloud generated successfully")
+        except Exception as e:
+            print(f"WordCloud generation error: {str(e)}")
+            return jsonify({'error': f'WordCloud generation failed: {str(e)}'}), 500
 
-        img = io.BytesIO() 
-        plt.figure(figsize=(8,4))
-        plt.imshow(wordCloud, interpolation='bilinear')
-        plt.axis("off")
-        plt.savefig(img, format='png')
-        plt.close()
-        img.seek(0)
-        img_base64 = base64.b64encode(img.getvalue()).decode()
-
-        return jsonify({'image': f"data:image/png;base64,{img_base64}"})
+        try:
+            img = io.BytesIO() 
+            plt.figure(figsize=(8,4))
+            plt.imshow(wordCloud, interpolation='bilinear')
+            plt.axis("off")
+            plt.savefig(img, format='png')
+            plt.close()
+            img.seek(0)
+            img_base64 = base64.b64encode(img.getvalue()).decode()
+            print("Image processing completed successfully")
+            
+            return jsonify({'image': f"data:image/png;base64,{img_base64}"})
+        except Exception as e:
+            print(f"Image processing error: {str(e)}")
+            return jsonify({'error': f'Image processing failed: {str(e)}'}), 500
 
     except Exception as e:
-        print(f"Error: {str(e)}")
-        return jsonify({'error': str(e)}), 500
+        print(f"General error in generate: {str(e)}")
+        return jsonify({'error': f'Failed to generate cloud: {str(e)}'}), 500
+
+@app.route('/stats', methods=['POST'])
+def stats():
+    try:
+        text = request.form.get('text')
+        print(f"Received text for stats: {len(text) if text else 'None'}")
+        
+        if not text:
+            return jsonify({'error': 'No text provided'}), 400
+            
+        lng = request.form.get('lng', 'en')
+        print(f"Language for stats: {lng}")
+        
+        try:
+            text = transformText(text, lng)
+            print("Text transformation successful")
+        except Exception as e:
+            print(f"Text transformation error: {str(e)}")
+            return jsonify({'error': f'Text transformation failed: {str(e)}'}), 500
+            
+        num_words = len(text)
+        num_unique_words = len(set(text))
+        word_freq = nltk.FreqDist(text)
+        most_common_words = word_freq.most_common(10)
+        stats = [{'word': word, 'frequency': freq} for word, freq in most_common_words]
+        print("Stats generated successfully")
+        
+        return jsonify({
+            'num_words': num_words, 
+            'num_unique_words': num_unique_words, 
+            'stats': stats
+        })
+    except Exception as e:
+        print(f"General error in stats: {str(e)}")
+        return jsonify({'error': f'Stats generation failed: {str(e)}'}), 500
     
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=True)
