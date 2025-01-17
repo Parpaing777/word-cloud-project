@@ -13,6 +13,6 @@ RUN python -m nltk.downloader -d /app/nltk_data punkt stopwords wordnet omw-1.4
 
 COPY . .
 
-EXPOSE 5000
+EXPOSE 8080
 
 CMD ["python", "app.py"]
