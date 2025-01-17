@@ -1,0 +1,24 @@
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment files
+.env
+.venv
+
+# Logs
+*.log
+
+# Ignore IDE configurations
+.vscode/
+.idea/
+
+# Node modules (if applicable in a future version)
+node_modules/
+
+# Git and version control
+.git
+.gitignore
+
+stopwords/

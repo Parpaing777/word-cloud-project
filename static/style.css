@@ -74,6 +74,13 @@ select {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+#output img {
+    max-width: 100%; /* Prevents the image from exceeding the container width */
+    height: auto; /* Maintains aspect ratio */
+    border: 2px solid #ccc; /* Optional styling */
+    border-radius: 8px; /* Optional rounded corners */
+}
+
 /* Container for Generate, Stats and Dropdown */
 .btn-grp {
     display: flex;

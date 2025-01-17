@@ -6,9 +6,7 @@ import base64
 import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
-import pandas as pd
 import re
-import os
 import matplotlib as mpl
 mpl.use('Agg')
 from flask_cors import CORS
@@ -16,34 +14,10 @@ from flask_cors import CORS
 app = Flask(__name__, static_folder="static", template_folder="templates") 
 CORS(app)
 
-nltk.data.path.append(os.path.join(os.path.dirname(__file__), 'stopwords'))
-
-
-# def check_nltk():
-#     """Helper function to check nltk downloads"""
-#     try:
-#         nltk.data.find('tokenizers/punkt')
-#         nltk.data.find('corpora/stopwords')
-#         nltk.data.find('corpora/wordnet')
-#         nltk.data.find('corpora/omw-1.4')
-#     except LookupError as e:
-#         print(f"NLTK Data not found: {str(e)}")
-#         try:
-#             nltk.download('punkt')
-#             nltk.download('stopwords')
-#             nltk.download('wordnet')
-#             nltk.download('omw-1.4')
-#             print("NLTK Data downloaded successfully")
-#         except Exception as e:
-#             print(f"Error downloading NLTK data: {str(e)}")
-#             raise
-
-def tokenize(text):
-    """
-    This function takes the text input and tokenizes it.
-    """
-    tokens = word_tokenize(text)
-    return tokens
+nltk.download('punkt_tab', quiet=True) 
+nltk.download('stopwords', quiet=True)
+nltk.download('wordnet', quiet=True)
+nltk.download('omw-1.4', quiet=True)
 
 def cleanText(text, lng="en"):
     """
@@ -57,8 +31,7 @@ def cleanText(text, lng="en"):
         print("Language is not yet supported. Please pick either 'en' for English or 'fr' for French.")
         return None
     
-    # call the tokenize function
-    tokens = tokenize(text)
+    tokens = word_tokenize(text)
     # lowercase the text
     tokens = [word.lower() for word in tokens]
     # remove punctuation
@@ -108,8 +81,6 @@ def transformText(text, lng="en"):
     text = lemText(text, lng)
     return text
 
-# check_nltk()
-
 @app.route('/')
 def home():
     return render_template('index.html')
@@ -119,21 +90,13 @@ def genWordCloud():
     try:
         text = request.form.get('text','')
         lng = request.form.get('lng')
-        
-        # Add debugging prints
-        print(f"Received text length: {len(text)}")
-        print(f"Received language: {lng}")
-        
+
         if not text:
             return jsonify({'error': 'Please provide some text.'}), 400
         
         # Transform the text and create word chain
         text = transformText(text, lng)
-        print(f"Transformed text length: {len(text)}")
-        
         text = " ".join(text)
-        print("Text joined successfully")
-        
         # Generate the word cloud
         try:
             wordCloud = WordCloud(width=800, height=400, background_color="white", max_words=5000, contour_width=3)
