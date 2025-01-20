@@ -77,7 +77,7 @@ def transformText(text, lng="en"):
     This function applies all the text transformation functions to the tokens.
     """
     text = cleanText(text, lng)
-    text = stemText(text, lng)
+    # text = stemText(text, lng)
     text = lemText(text, lng)
     return text
 
