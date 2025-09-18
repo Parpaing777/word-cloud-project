@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_from_directory
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 import io
@@ -11,7 +11,7 @@ import matplotlib as mpl
 mpl.use('Agg')
 from flask_cors import CORS
 
-app = Flask(__name__) 
+app = Flask(__name__, static_folder='static', static_url_path='/') 
 CORS(app)
 
 nltk.download('punkt_tab', quiet=True) 
@@ -81,7 +81,9 @@ def transformText(text, lng="en"):
     text = lemText(text, lng)
     return text
 
-
+@app.route('/')
+def index():
+    return send_from_directory(app.static_folder, 'index.html')
 
 @app.route('/generate', methods=['POST'])
 def genWordCloud():
