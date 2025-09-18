@@ -11,7 +11,7 @@ import matplotlib as mpl
 mpl.use('Agg')
 from flask_cors import CORS
 
-app = Flask(__name__, static_folder="static", template_folder="templates") 
+app = Flask(__name__) 
 CORS(app)
 
 nltk.download('punkt_tab', quiet=True) 
@@ -81,15 +81,14 @@ def transformText(text, lng="en"):
     text = lemText(text, lng)
     return text
 
-@app.route('/')
-def home():
-    return render_template('index.html')
+
 
 @app.route('/generate', methods=['POST'])
 def genWordCloud():
     try:
-        text = request.form.get('text','')
-        lng = request.form.get('lng')
+        data = request.get_json()
+        text = data.get('text','')
+        lng = data.get('lng','en')
 
         if not text:
             return jsonify({'error': 'Please provide some text.'}), 400
@@ -129,13 +128,14 @@ def genWordCloud():
 @app.route('/stats', methods=['POST'])
 def stats():
     try:
-        text = request.form.get('text')
+        data = request.get_json()
+        text = data.get('text','')
         print(f"Received text for stats: {len(text) if text else 'None'}")
         
         if not text:
             return jsonify({'error': 'No text provided'}), 400
             
-        lng = request.form.get('lng', 'en')
+        lng = data.get('lng', 'en')
         print(f"Language for stats: {lng}")
         
         try:
